@@ -52,7 +52,8 @@
                     snipet += '<div class="s"></div>';
                 } else if (i === this.size - 2 && j === this.size - 2) {
                     snipet += '<div class="e"></div>';
-                } else if (this.box[i][j] === 0) {
+                // agent（i is col, j is row）
+                } else if (this.box[j][i] === 0) {
                     // 壁
                     snipet += '<div class="w"></div>';
                 } else {
@@ -64,6 +65,41 @@
         this.$maze.innerHTML = snipet;
         this.$maze.style.height = (this.size * 10) + 'px';
         this.$maze.style.width  = (this.size * 10) + 'px';
+    }
+
+    /**
+        エージェント表示
+    */
+    p.showAgent = function (agentPos) {
+        // convert
+        agentPos = [agentPos[0] + 1, agentPos[1] + 1];
+        console.debug("agentPos:", agentPos);
+        // show
+        var snipet = '';
+        for (var i = 0; i < this.size; i++) {
+            for (var j = 0; j < this.size; j++) {
+                // agent（i is col, j is row）
+                if (j === agentPos[0] && i === agentPos[1]) {
+                    snipet += '<div class="a"></div>';
+                // start
+                } else if (i === 1 && j === 1) {
+                    snipet += '<div class="s"></div>';
+                // end
+                } else if (i === this.size - 2 && j === this.size - 2) {
+                    snipet += '<div class="e"></div>';
+                // wall
+                // agent（i is col, j is row）
+                } else if (this.box[j][i] === 0) {
+                    snipet += '<div class="w"></div>';
+                // path
+                } else {
+                    snipet += '<div class="p"></div>';
+                }
+            }
+        }
+        this.$maze.innerHTML = snipet;
+        this.$maze.style.height = (this.size * 10) + 'px';
+        this.$maze.style.width  = (this.size * 10) + 'px';        
     }
 
 
