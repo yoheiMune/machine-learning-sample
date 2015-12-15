@@ -1,0 +1,13 @@
+(function () {
+
+    window.QLearn = function () {}
+
+
+
+
+
+
+
+
+
+})();
