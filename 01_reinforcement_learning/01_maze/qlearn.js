@@ -18,10 +18,10 @@
     /**
         Q Learning.
     */
-    window.QLearn = function (size, maze) {
+    window.QLearn = function (options) {
         this.q = [];
-        this.size = size;
-        this.maze = maze;
+        this.size = options.size;
+        this.maze = options.maze;
         this.actions = ["top", "left", "bottom", "right"];
         this.displayInterval = 16;
         this.initialize();
@@ -43,9 +43,6 @@
         }
         this.pos = [0, 0];
         this.goal = [this.size - 1, this.size - 1];
-        // console.debug("Q:", this.q);
-        // console.debug("pos:", this.pos);
-        // console.debug("goal:", this.goal);
     }
 
     /**
@@ -53,8 +50,8 @@
     */
     p.learn = function () {
 
-        console.debug("******");
-        console.debug("pos:", this.pos);
+        // 停止判定
+        if (this.stopFlg === true) return;
 
         // 終了判定
         if (this.pos[0] === this.goal[0] && this.pos[1] === this.goal[1]) {
@@ -79,15 +76,15 @@
         // アクションを選択する
         var action = this.selectAction(this.pos);
         this.currentAction = action;
-        console.debug("action:", action);
+        // console.debug("action:", action);
 
         // 環境から報酬を受け取る
         var rewardAndState = this.getRewardAndNextState(this.pos, action);
         var reward = rewardAndState[0];
         var nextPos = rewardAndState[1];
         // console.debug(this.pos, action, reward, nextPos);
-        console.debug("reward:", reward);
-        console.debug("nextpos:", nextPos);
+        // console.debug("reward:", reward);
+        // console.debug("nextpos:", nextPos);
 
         // Q値を更新する
         this.updateQValue(this.pos, action, reward, nextPos);
@@ -98,9 +95,6 @@
 
         // エージェントの位置を表示する
         this.maze.showAgent(this.pos);
-
-        // Q値表示
-        this._showQValue();
 
         // 次へ
         this._doNext();
@@ -114,7 +108,7 @@
 
         var qValue = this.q[pos[0]][pos[1]][action];
 
-        // 次のPosの最大報酬を見つける
+        // // 次のPosの最大報酬を見つける
         var nextMaxReward = -999;
         var nextQ = this.q[nextPos[0]][nextPos[1]];
         for (act in nextQ) {
@@ -136,71 +130,106 @@
 
         posMaze_x = pos[0] + 1;
         posMaze_y = pos[1] + 1;
-        console.debug('maze: ', posMaze_x, posMaze_y);
+
+
+        // 行き止まりペナルティを使う場合
+        if (this.useDeadEndPenalty) {
+            // 上下左右で3つ壁の場合は行き止まりと判定
+            var wallCount = 0;
+            var nextPos;
+            // 上
+            if (this.maze.box[posMaze_x][posMaze_y - 1] === 0) {
+                wallCount++;
+            } else {
+                nextPos = [pos[0], pos[1] - 1];
+            }
+            // 下
+            if (this.maze.box[posMaze_x][posMaze_y + 1] === 0) {
+                wallCount++;
+            } else {
+                nextPos = [pos[0], pos[1] + 1];
+            }
+            // 左
+            if (this.maze.box[posMaze_x - 1][posMaze_y] === 0) {
+                wallCount++;
+            } else {
+                nextPos = [pos[0] - 1, pos[1]];
+            }
+            // 右
+            if (this.maze.box[posMaze_x + 1][posMaze_y] === 0) {
+                wallCount++;
+            } else {
+                nextPos = [pos[0]  + 1, pos[1]];
+            }
+            if (wallCount === 3) {
+                return [this.deadEndPenalty, nextPos];
+            }
+        }
+
 
         switch (action) {
             case 'top':
-                console.debug("---- top");
+                // console.debug("---- top");
                 // 壁
                 if (this.maze.box[posMaze_x][posMaze_y - 1] === 0) {
-                    console.debug("-- wall");
+                    // console.debug("-- wall");
                     return [this.penalty, pos];
                 // ゴール
                 } else if (pos[0] === this.goal[0] && (pos[1] - 1) === this.goal[1]) {
-                    console.debug("-- goal");
+                    // console.debug("-- goal");
                     return [this.goalReward, [pos[0], pos[1]-1]];
                 // 通路
                 } else {
-                    console.debug("-- pass");
-                    return [this.backPenalty, [pos[0], pos[1]-1]];
+                    // console.debug("-- pass");
+                    return [this.stepPenalty, [pos[0], pos[1]-1]];
                 }
                 break;
             case 'bottom':
-                console.debug("---- bottom");
+                // console.debug("---- bottom");
                 // 壁
                 if (this.maze.box[posMaze_x][posMaze_y + 1] === 0) {
-                    console.debug("-- wall");
+                    // console.debug("-- wall");
                     return [this.penalty, pos];
                 // ゴール
                 } else if (pos[0] === this.goal[0] && (pos[1] + 1) === this.goal[1]) {
-                    console.debug("-- goal");
+                    // console.debug("-- goal");
                     return [this.goalReward, [pos[0], pos[1]+1]];
                 // 通路
                 } else {
-                    console.debug("-- pass");
-                    return [this.passReward, [pos[0], pos[1]+1]];
+                    // console.debug("-- pass");
+                    return [this.stepPenalty, [pos[0], pos[1]+1]];
                 }
                 break;
             case 'left':
-                console.debug("---- left");
+                // console.debug("---- left");
                 // 壁
                 if (this.maze.box[posMaze_x - 1][posMaze_y] === 0) {
-                    console.debug("-- wall");
+                    // console.debug("-- wall");
                     return [this.penalty, pos];
                 // ゴール
                 } else if ((pos[0] - 1) === this.goal[0] && pos[1] === this.goal[1]) {
-                    console.debug("-- goal");
+                    // console.debug("-- goal");
                     return [this.goalReward, [pos[0]-1, pos[1]]];
                 // 通路
                 } else {
-                    console.debug("-- pass");
-                    return [this.backPenalty, [pos[0]-1, pos[1]]];
+                    // console.debug("-- pass");
+                    return [this.stepPenalty, [pos[0]-1, pos[1]]];
                 }
                 break;
             case 'right':
-                console.debug("---- right");
+                // console.debug("---- right");
                 // 壁
                 if (this.maze.box[posMaze_x + 1][posMaze_y] === 0) {
-                    console.debug("-- wall");
+                    // console.debug("-- wall");
                     return [this.penalty, pos];
                 // ゴール
                 } else if ((pos[0] + 1) === this.goal[0] && pos[1] === this.goal[1]) {
-                    console.debug("-- goal");
+                    // console.debug("-- goal");
                     return [this.goalReward, [pos[0]+1, pos[1]]];
                 // 通路
                 } else {
-                    console.debug("-- pass");
-                    return [this.passReward, [pos[0]+1, pos[1]]];
+                    // console.debug("-- pass");
+                    return [this.stepPenalty, [pos[0]+1, pos[1]]];
                 }
                 break;
             default:
@@ -254,20 +283,23 @@
     /**
         学習設定
     */
-    p.learningSetting = function () {
+    p.learningSetting = function (learningRate, discountRate, epsilon) {
         // reward
         this.penalty = -10;       // 壁にぶつかったら-1
         // this.backPenalty = -1;   // 戻ると-1
         this.backPenalty = 0;   // 戻ると-1
+        this.stepPenalty = -0.1;    // 1歩ごとに-0.1
         // this.passReward = 1;     // 進めば+1
         this.passReward = 0;     // 進めば+1
         this.goalReward = 100;   // ゴールに達したら+100
+        // this.useDeadEndPenalty = true;  // 行き止まりの場合のペナルティを使うか
+        // this.deadEndPenalty = -50;  // 行き止まりペナルティ
         // settings
-        this.alpha = 0.3;        // learning rate.
-        this.gampa = 0.9;        // discount rate.
-        this.epsilon = 1;      // ε-グリーディー戦略
-        this.maxIter = Math.floor(Math.max(40, Math.pow(this.size, 2.5)));     // 学習回数
-        this.maxAct  = this.maxIter;     // 学習1回あたりの最大行動回数
+        this.alpha = learningRate;        // learning rate.
+        this.gampa = discountRate;        // discount rate.
+        this.epsilon = epsilon;      // ε-グリーディー戦略
+        this.maxIter = Math.floor(Math.max(40, Math.pow(this.size, 2)));     // 学習回数
+        this.maxAct  = Math.floor(Math.max(40, Math.pow(this.size, 2.7)));;     // 学習1回あたりの最大行動回数
         this.iterCount = 0;      // 現在の学習回数
         this.actCount = 0;       // 現在の行動カウント
     }
@@ -292,9 +324,10 @@
         次の行動を行う
     */
     p._doNext = function () {
-        var that = this;
+        // Q値表示
+        this._showQValue();
+        var that = this;            
         setTimeout(function () {
-            console.debug("iter:", that.iterCount, ", act:", that.actCount);
             that.learn();
         }, this.displayInterval);
     }
@@ -303,7 +336,7 @@
         終了処理
     */
     p._finishAction = function () {
-        console.debug("finish");
+        console.log("finish");
         this._showQValue();
 
     }
@@ -336,6 +369,8 @@
                     var val = that.q[j][i][action];
                     if (val < 0) {
                         snipet += '  ' + action + '\t: q=<span class="red">' + floorNumber(val) + '</span><br>';
+                    } else if (val > 0) {
+                        snipet += '  ' + action + '\t: q=<span class="blue">' + floorNumber(val) + '</span><br>';
                     } else {
                         snipet += '  ' + action + '\t: q=<span class="">' + floorNumber(val) + '</span><br>';
                     }
@@ -348,9 +383,12 @@
     }
 
 
-
-
-
+    /**
+        停止
+    */
+    p.stop = function () {
+        this.stopFlg = true;
+    }
 
 
 })();

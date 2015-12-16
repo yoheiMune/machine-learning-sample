@@ -73,7 +73,7 @@
     p.showAgent = function (agentPos) {
         // convert
         agentPos = [agentPos[0] + 1, agentPos[1] + 1];
-        console.debug("agentPos:", agentPos);
+        // console.debug("agentPos:", agentPos);
         // show
         var snipet = '';
         for (var i = 0; i < this.size; i++) {
@@ -147,6 +147,9 @@
                 }
             }
         }
+
+        // debug
+        // return;
 
         // その後の壁の行は下左右に倒してOK（重なるのはNG）
         var direction = ['bottom', 'left', 'right'];
