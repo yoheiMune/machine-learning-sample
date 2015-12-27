@@ -90,7 +90,7 @@
         // debug
         // return;
 
-        // その後の壁の行は下左右に倒してOK（重なるのはNG）
+        // ここから壁倒しで迷路を作る
         var direction = ['bottom', 'left', 'right'];
         for (var r = 0; r < this.box.length; r++) {
             // 最初と最後の行は対象外
