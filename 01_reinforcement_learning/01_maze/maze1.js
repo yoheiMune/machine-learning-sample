@@ -3,12 +3,17 @@
     // ref: 迷路作り
     // http://www5d.biglobe.ne.jp/~stssk/maze/make.html
 
+    // 配列をシャッフルする
     function shuffle (o) {
         for(var j, x, i = o.length; i; j = Math.floor(Math.random() * i), x = o[--i], o[i] = o[j], o[j] = x);
         return o;
     }
 
+    /**
+        迷路を表現するクラス
+    */
     window.Maze = function (size) {
+        // 壁と通路の関係上、サイズは奇数にしとく
         this.size = (size % 2 === 0 ? size + 1 : size);
         this.box = [];
         this.$maze = document.querySelector("#maze");
@@ -19,22 +24,16 @@
     */
     Maze.ALGO = {STICK: 1};
 
-
     var p = Maze.prototype;
 
     /**
-        迷路表示
+        迷路を表示する
     */
     p.show = function () {
         var snipet = '';
         for (var i = 0; i < this.size; i++) {
             for (var j = 0; j < this.size; j++) {
-                if (i === 1 && j === 1) {
-                    snipet += '<div class="s"></div>';
-                } else if (i === this.size - 2 && j === this.size - 2) {
-                    snipet += '<div class="e"></div>';
-                // agent（i is col, j is row）
-                } else if (this.box[j][i] === 0) {
+                if (this.box[j][i] === 0) {
                     // 壁
                     snipet += '<div class="w"></div>';
                 } else {
@@ -49,42 +48,6 @@
     }
 
     /**
-        エージェント表示
-    */
-    p.showAgent = function (agentPos) {
-        // convert
-        agentPos = [agentPos[0] + 1, agentPos[1] + 1];
-        // console.debug("agentPos:", agentPos);
-        // show
-        var snipet = '';
-        for (var i = 0; i < this.size; i++) {
-            for (var j = 0; j < this.size; j++) {
-                // agent（i is col, j is row）
-                if (j === agentPos[0] && i === agentPos[1]) {
-                    snipet += '<div class="a"></div>';
-                // start
-                } else if (i === 1 && j === 1) {
-                    snipet += '<div class="s"></div>';
-                // end
-                } else if (i === this.size - 2 && j === this.size - 2) {
-                    snipet += '<div class="e"></div>';
-                // wall
-                // agent（i is col, j is row）
-                } else if (this.box[j][i] === 0) {
-                    snipet += '<div class="w"></div>';
-                // path
-                } else {
-                    snipet += '<div class="p"></div>';
-                }
-            }
-        }
-        this.$maze.innerHTML = snipet;
-        this.$maze.style.height = (this.size * 10) + 'px';
-        this.$maze.style.width  = (this.size * 10) + 'px';        
-    }
-
-
-    /**
         迷路を作る
     */
     p.create = function (options) {
@@ -94,7 +57,6 @@
         }
         this.show();
     }
-
 
     /**
         迷路を作る（棒倒し）
