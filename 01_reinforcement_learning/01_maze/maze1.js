@@ -91,7 +91,6 @@
         // return;
 
         // ここから壁倒しで迷路を作る
-        var direction = ['bottom', 'left', 'right'];
         for (var r = 0; r < this.box.length; r++) {
             // 最初と最後の行は対象外
             if (r === 0 || (r + 1) === this.box.length) {
