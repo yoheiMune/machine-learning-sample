@@ -1,0 +1,7 @@
+# data
+02_neuralnet/data/*
+.DS_Store
+_ref_coursera
+octave-workspace
+*.mat
+
