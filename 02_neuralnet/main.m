@@ -3,20 +3,20 @@
 % 
 % Data: http://yann.lecun.com/exdb/mnist/
 
-
 % Initialize
 clear; close all; clc
 
 
 % Setup the parameters for NN
 input_layer_size  = 784; % 28x28;
-hidden_layer_size = 25;
+hidden_layer_size = 100;
 output_layer_size = 10;
 
 
 % Load Data.
 fprintf('Loading data ... \n')
-[X, Y, X_test, Y_test, n_col, n_row] = loaddata();
+sampleSize = 5000
+[X, Y, X_test, Y_test, n_col, n_row] = loaddata(sampleSize);
 
 
 % Show Data.
@@ -30,14 +30,15 @@ nn_params = [Theta1(:);Theta2(:)];
 
 
 % Predict before training.
+fprintf('\nTest before training.\n')
 test_nn(Theta1, Theta2, X_test, Y_test);
 
 
-% sigmoid gradient
-fprintf('\nEvaluating sigmoid gradient...\n')
-g = sigmoidGradient([1 -0.5 0 0.5 1]);
-fprintf('%f ', g);
-fprintf('\n\n');
+% check: sigmoid gradient
+% fprintf('\nEvaluating sigmoid gradient...\n')
+% g = sigmoidGradient([1 -0.5 0 0.5 1]);
+% fprintf('%f ', g);
+% fprintf('\n\n');
 
 
 
@@ -50,7 +51,7 @@ fprintf('Feedforward Neural Network ... \n')
 J = nnCostFunction(nn_params, input_layer_size, hidden_layer_size, output_layer_size, X, Y, lambda);
 
 
-% Gradient check
+% check: Gradient check.
 % fprintf('\nChecking Backpropagation... \n')
 % checkNNGradients;
 % lambda = 3;
@@ -62,10 +63,10 @@ J = nnCostFunction(nn_params, input_layer_size, hidden_layer_size, output_layer_
 fprintf('\nTraining Neural Network... \n')
 
 % Option for fmincg
-options = optimset('MaxIter', 10);
+options = optimset('MaxIter', 50);
 
 % Weight for regularization.
-lambda = 1;
+lambda = 0.1;
 
 % Create "short hand" for the cost function to be optimized.
 costFunction = @(p) nnCostFunction(p, ...
@@ -86,6 +87,7 @@ Theta2 = reshape(nn_params((1 + (hidden_layer_size * (input_layer_size + 1))):en
 
 
 %% ================== Test ======================
+fprintf('\nTest after training.\n')
 test_nn(Theta1, Theta2, X_test, Y_test);
 
 

@@ -2,8 +2,11 @@
 %
 % ref: http://yann.lecun.com/exdb/mnist/
 % ref: http://nnet.dogrow.net/?p=31
+%
+% Training Set: 60,000
+% Test set: 10,000
 
-function [X, Y, X_test, Y_test, n_col, n_row] = loaddata ()
+function [X, Y, X_test, Y_test, n_col, n_row] = loaddata (sampleSize)
 
     % training label.
     fid = fopen('data/train-labels-idx1-ubyte', 'r', 'b');
@@ -14,7 +17,7 @@ function [X, Y, X_test, Y_test, n_col, n_row] = loaddata ()
     fclose(fid);
 
     % sampling.
-    Y = Y(1:400,:);
+    % Y = Y(1:sampleSize,:);
 
 
     % training data.
@@ -32,7 +35,7 @@ function [X, Y, X_test, Y_test, n_col, n_row] = loaddata ()
 
 
     % sampling.
-    X = X(1:400,:);
+    X = X(1:sampleSize,:);
 
 
     % test label.
@@ -45,7 +48,7 @@ function [X, Y, X_test, Y_test, n_col, n_row] = loaddata ()
 
 
     % sampling.
-    Y_test = Y_test(1:400,:);
+    % Y_test = Y_test(1:sampleSize,:);
 
 
 
@@ -63,7 +66,7 @@ function [X, Y, X_test, Y_test, n_col, n_row] = loaddata ()
     fclose(fid);
 
     % sampling
-    X_test = X_test(1:400,:);
+    X_test = X_test(1:sampleSize,:);
 
 
 
