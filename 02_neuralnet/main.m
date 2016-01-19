@@ -30,16 +30,7 @@ nn_params = [Theta1(:);Theta2(:)];
 
 
 % Predict before training.
-pred = predict(Theta1, Theta2, X_test);
-good = 0;
-m_test = size(X_test, 1)
-for i = 1:m_test
-    if pred(i) == Y_test(i)
-        good = good + 1;
-    end
-end
-% [pred, Y_test](1:10,:) % show results
-fprintf('precision: %f%%\n', (good * 100 / m_test));
+test_nn(Theta1, Theta2, X_test, Y_test);
 
 
 % sigmoid gradient
@@ -59,17 +50,43 @@ fprintf('Feedforward Neural Network ... \n')
 J = nnCostFunction(nn_params, input_layer_size, hidden_layer_size, output_layer_size, X, Y, lambda);
 
 
-
-% Gradient check 1
-fprintf('\nChecking Backpropagation... \n')
-checkNNGradients;
-
-
-
+% Gradient check
+% fprintf('\nChecking Backpropagation... \n')
+% checkNNGradients;
+% lambda = 3;
+% checkNNGradients(lambda);
 
 
 
+%% ================== Training NN ======================
+fprintf('\nTraining Neural Network... \n')
 
+% Option for fmincg
+options = optimset('MaxIter', 10);
+
+% Weight for regularization.
+lambda = 1;
+
+% Create "short hand" for the cost function to be optimized.
+costFunction = @(p) nnCostFunction(p, ...
+    input_layer_size, hidden_layer_size, output_layer_size, X, Y, lambda);
+
+% Training
+[nn_params, cost] = fmincg(costFunction, nn_params, options);
+
+% Obtain Theta1 and Theta2 back from nn_params.
+Theta1 = reshape(nn_params(1:hidden_layer_size * (input_layer_size + 1)), ...
+    hidden_layer_size, (input_layer_size + 1));
+
+Theta2 = reshape(nn_params((1 + (hidden_layer_size * (input_layer_size + 1))):end), ...
+    output_layer_size, (hidden_layer_size + 1));
+
+
+
+
+
+%% ================== Test ======================
+test_nn(Theta1, Theta2, X_test, Y_test);
 
 
 

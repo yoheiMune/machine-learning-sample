@@ -3,8 +3,8 @@ function p = predict(Theta1, Theta2, X)
 
 
     % Number of trainset.
-    m = size(X, 1)
-    num_labels = size(Theta2, 1)
+    m = size(X, 1);
+    num_labels = size(Theta2, 1);
 
 
     % Go Forward.
