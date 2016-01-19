@@ -65,4 +65,18 @@ function [X, Y, X_test, Y_test, n_col, n_row] = loaddata ()
     % sampling
     X_test = X_test(1:400,:);
 
+
+
+    % modify answer 0 => 10
+    for i = 1:size(Y, 1)
+        if Y(i) == 0
+            Y(i) = 10;
+        end
+    end
+    for i = 1:size(Y_test, 1)
+        if Y_test(i) == 0
+            Y_test(i) = 10;
+        end
+    end
+
 endfunction
