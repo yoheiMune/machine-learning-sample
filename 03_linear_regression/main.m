@@ -29,14 +29,14 @@ fprintf('\nRunning Gradient Descent ...\n')
 X = [ones(m,1), X];
 theta = zeros(2, 1);
 
-iterations = 1500;
+iterations = 150;
 alpha = 0.01;
 
 % compute and display initial cost.
 initialcost = computeCost(X, y, theta)
 
 % run gradient descent.
-theta = gradientDescent(X, y, theta, alpha, iterations);
+[theta, J_history] = gradientDescent(X, y, theta, alpha, iterations);
 fprintf('\n theta is %f %f\n', theta);
 
 % Plot the linear fit.
@@ -44,7 +44,17 @@ hold on;
 plot(X(:,2), X*theta, '-');
 legend('Training data', 'Linear regression');
 hold off;
+pause;
 
+
+% Plot Cost.
+iter = zeros(iterations, 1);
+for i = 1:iterations
+    iter(i) = i;
+end
+plot(iter, J_history, '-');
+legend('Iterations', 'Cost');
+pause;
 
 % Predict values.
 % -----------------------------
@@ -95,4 +105,8 @@ xlabel('\theta_0');
 ylabel('\theta_1');
 hold on;
 plot(theta(1), theta(2), 'rx', 'MarkerSize', 10, 'LineWidth', 2);
+
+
+
+
 
