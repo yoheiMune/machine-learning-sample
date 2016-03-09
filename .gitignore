@@ -4,4 +4,6 @@
 _ref_coursera
 octave-workspace
 *.mat
-
+data
+dist
+sample*.html
