@@ -1,5 +1,5 @@
 # -*- coding: utf-8 -*-
-# Sample of Numpy, Scypy and Matplotlib
+# Sample of Numpy
 # http://cs231n.github.io/python-numpy-tutorial/
 import numpy as np
 
