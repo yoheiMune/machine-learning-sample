@@ -86,6 +86,20 @@ exgp.display()
 # TODO コードリーディング
 # 現状だとよくわからんw
 
+"""
+1
+8
+if
+ isgreater
+  p0
+  3
+ add
+  p1
+  5
+ subtract
+  p1
+  2
+"""
 
 
 
