@@ -63,8 +63,8 @@ class constnode:
         print(" "*indent + str(self.v))        
 
 
-## 01. 試しに使って見る
-############################
+
+# Functions list.
 addw = fwrapper(lambda x:x[0]+x[1], 2, "add")
 subw = fwrapper(lambda x:x[0]-x[1], 2, "subtract")
 mulw = fwrapper(lambda x:x[0]*x[1], 2, "multiply")
@@ -72,6 +72,7 @@ ifw  = fwrapper(lambda x:x[1] if x[0]>0 else x[2], 3, "if")
 gtw  = fwrapper(lambda x:1 if x[0]>x[1] else 0, 2, "isgreater")
 flist = [addw, subw, ifw, gtw]
 
+# Test
 def exampletree():
     return node(ifw, [
             node(gtw,  [paramnode(0), constnode(3)]),
@@ -79,34 +80,79 @@ def exampletree():
             node(subw, [paramnode(1), constnode(2)])
         ])
 exgp = exampletree()
-print(exgp.evaluate([2,3]))
-print(exgp.evaluate([5,3]))
-exgp.display()
-
-# TODO コードリーディング
-# 現状だとよくわからんw
-
-"""
-1
-8
-if
- isgreater
-  p0
-  3
- add
-  p1
-  5
- subtract
-  p1
-  2
-"""
+# print(exgp.evaluate([2,3]))
+# print(exgp.evaluate([5,3]))
+# exgp.display()
 
 
+# 最初の集団を作る
+def makerandomtree(pc, maxdepth=4, fpr=0.5, ppr=0.6):
+    """
+        Make a tree random.
+        @param pc       : the number of params which is set to this tree.
+        @param maxdepth : the depth of tree.
+        @param fpr      : the ratio of making a function node.
+        @param ppr      : the ratio of making a param node.
+    """
+    if random() < fpr and maxdepth > 0:
+        f = choice(flist)
+        children = [makerandomtree(pc, maxdepth-1, fpr, ppr) for i in range(f.childcount)]
+        return node(f, children)
+    elif random()  < ppr:
+        return paramnode(randint(0, pc-1))
+    else:
+        return constnode(randint(0, 10))
+
+# test.
+random1 = makerandomtree(2) 
+random2 = makerandomtree(2)
+# makerandomtree(2).display()
+
+# This is a function which the Genetic Algorithm will find.
+def hiddenfunction(x, y):
+    return x**2+2*y+3*x+5
+
+# Create a set which has params and answers.
+def buildhiddenset():
+    rows = []
+    for i in range(200):
+        x = randint(0, 40)
+        y = randint(0, 40)
+        rows.append([x, y, hiddenfunction(x, y)])
+    return rows
+hiddenset = buildhiddenset()
+
+# Scoring tree performance.
+def scorefunction(tree, s):
+    diff = 0
+    for data in s:
+        v = tree.evaluate([data[0], data[1]])
+        diff += abs(v - data[2])
+    return diff
+
+# Test
+# print(scorefunction(random1, hiddenset))
+# print(scorefunction(random2, hiddenset))
 
 
+# Mutation evolution.
+def mutate(t, pc, probchange=0.1):
+    if random() < probchange:
+        return makerandomtree(pc)
+    else:
+        result = deepcopy(t)
+        if hasattr(t, "children"):
+            result.children = [mutate(c, pc, probchange) for c in t.children]
+        return result
 
-
-
+# Test
+# random2.display()
+# print("-----")
+# muttree = mutate(random2, 2)
+# muttree.display()
+# print("-----")
+# print(scorefunction(random2, hiddenset))
+# print(scorefunction(muttree, hiddenset))
 
 
 
