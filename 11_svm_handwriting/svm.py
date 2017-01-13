@@ -1,5 +1,6 @@
 from os import path
 from sklearn import cross_validation, svm, metrics
+from sklearn.externals import joblib
 
 # TODO リソース閉じる
 
@@ -49,3 +50,6 @@ if __name__ == "__main__":
     cl_report = metrics.classification_report(test["labels"], predict)
     print("正解率 = ", ac_score)
     print(cl_report)
+
+    # 結果を保存する
+    joblib.dump(clf, path.join("data-clf", "freq.pkl"))
