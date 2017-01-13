@@ -53,7 +53,7 @@ def to_csv(type_, label_path, data_path):
     # TODO できればpng出力にしたいなー
     if type_ == "training":
         # 10個だけ画像として書きだし
-        for i, image in enumerate(images[:10]):
+        for i, image in enumerate(images[:100]):
             s = "P2 28 28 255\n"
             s += " ".join(image.split(","))
             p = path.join("data_image_sample", str(i) + ".pgm")

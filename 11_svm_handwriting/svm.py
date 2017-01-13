@@ -14,7 +14,7 @@ if __name__ == "__main__":
     test_label = path.join("./data_test", "labels.csv")
 
     # トレーニング用のデータ（5,000件に絞る）
-    training_size = 2000
+    training_size = 20000
     training = { "labels": [], "images": [] }
     images = open(traing_data, "r").read().split("\n")[:training_size]
     labels = open(traing_label, "r").read().split("\n")[:training_size]

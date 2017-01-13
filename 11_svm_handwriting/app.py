@@ -13,7 +13,7 @@ def index():
 @app.route("/api/judge")
 def api_judge():
     data = request.args.get("data").split(",")
-    data = [float(d) for d in data]
+    data = [float(d) / 256 for d in data]
     # print("data.size=", len(data), data)
 
     # 機械学習の結果を読み込む.

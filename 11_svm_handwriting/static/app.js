@@ -27,7 +27,7 @@ function api(url) {
 function draw() {
 
     context.clearRect(0, 0, canvas.width, canvas.height);
-    context.lineWidth = 15;
+    context.lineWidth = 40;
     context.lineCap = 'round';
 
     for (let i = 0; i < points.length; i++) {
@@ -71,7 +71,7 @@ function judge() {
     var imgd = tmpCanvas.getContext('2d').getImageData(0, 0, 28, 28);
     var pixcels = imgd.data;
     for (let i = 0; i < pixcels.length; i += 4) {
-        let alpha = pixcels[i + 3] / 255;
+        let alpha = pixcels[i + 3];
         data.push(alpha);
     }
 
@@ -114,6 +114,8 @@ function handleMouseMove(e) {
 function handleMouseUp() {
     console.log('upOrLeave');
     drawing = false;
+
+    judge();
 }
 
 function handleDelButtonClick() {
@@ -121,10 +123,10 @@ function handleDelButtonClick() {
     points = [];
 }
 
-function handleJudgeButtonClick() {
-    console.log('handleJudgeButtonClick');
-    judge();
-}
+// function handleJudgeButtonClick() {
+//     console.log('handleJudgeButtonClick');
+//     judge();
+// }
 
 function startApplication() {
 
@@ -141,8 +143,8 @@ function startApplication() {
     let delButton = document.getElementById('delButton');
     delButton.addEventListener('click', handleDelButtonClick);
 
-    let judgeButton = document.getElementById('judgeButton');
-    judgeButton.addEventListener('click', handleJudgeButtonClick);
+    // let judgeButton = document.getElementById('judgeButton');
+    // judgeButton.addEventListener('click', handleJudgeButtonClick);
 
 }
 
