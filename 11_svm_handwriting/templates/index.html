@@ -1,0 +1,43 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title></title>
+    <style>
+        #canvas {
+            display: block;
+/*            width: 300px;
+            height: 300px;
+*/            border: 1px solid #ccc;
+        }
+        .flex-box {
+            display: flex;
+        }
+        #judgeButton {
+            margin: 10px;
+        }
+        #result {
+            width: 300px;
+            height: 300px;
+            border: 1px solid #ccc;
+            font-size: 200px;
+            text-align: center;
+            line-height: 300px;
+        }
+    </style>
+    <script type="text/javascript" src="/static/app.js"></script>
+</head>
+<body>
+    
+    <h1>ハロー</h1>
+
+    <div class="flex-box">
+        <div>
+            <canvas id="canvas" width="300" height="300"></canvas>
+            <button id="delButton">消す</button>
+        </div>
+        <button id="judgeButton">判定する&nbsp;=&gt;</button>
+        <div id="result"></div>
+    </div>
+</body>
+</html>
