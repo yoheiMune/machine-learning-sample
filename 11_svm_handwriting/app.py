@@ -1,8 +1,7 @@
 from os import path
-from sklearn import cross_validation, svm, metrics
+from sklearn import svm
 from sklearn.externals import joblib
 from flask import Flask, render_template, request
-import json
 
 app = Flask(__name__)
 
@@ -14,16 +13,13 @@ def index():
 def api_judge():
     data = request.args.get("data").split(",")
     data = [float(d) / 256 for d in data]
-    # print("data.size=", len(data), data)
 
-    # 機械学習の結果を読み込む.
-    pklfile = path.join("data-clf", "freq.pkl")
+    # Load the training result.
+    pklfile = path.join("result", "svm.pkl")
     clf = joblib.load(pklfile)
 
-    # 予測
-    print("#### 予測開始")
+    # Predict
     predict = clf.predict([data])
-    print(predict)
 
     return str(predict.tolist()[0])
 
