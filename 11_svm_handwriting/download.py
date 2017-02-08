@@ -5,6 +5,7 @@ import os
 from urllib.request import urlopen
 
 def download(fname):
+    """指定されたMNISTファイルをサーバーから取得します"""
     print("%s downloading..." % fname)
     with urlopen("http://yann.lecun.com/exdb/mnist/" + fname) as res:
         d = res.read()

@@ -1,77 +1,63 @@
-#
-# Conver MNIST data to csv files.
-#
-import sys
+"""
+    SVM適用前のデータの前処理を行います.
+    MNISTファイル(gzip)を、CSVファイルに変換します.
+"""
 import os
-from os import path
 import gzip
 import struct
 
-# TODO リファクタリングするー
+def csv_image(fname, type_):
+    """
+        画像データを出力します.
+        @param {String} fname - MNISTのファイル名
+        @param {String} type_ - one of { training | test }
+    """
+    print("%s processing..." % fname)
 
-"""
-    ・ファイルを解凍してcsvを作成（データ、ラベルそれぞれ）（→data1フォルダ）
-    ・画像サンプルを出力（→data_img_sampleフォルダ）
-    ・5,000件でトレーニングとテスト
-"""
+    # 画像データをGzipファイルから読み取ります.
+    with gzip.open(os.path.join("mnist", fname), "rb") as f:
+        _, cnt, rows, cols = struct.unpack(">IIII", f.read(16))
+        # 画像読み込み
+        images = []
+        for i in range(cnt):
+            binarys = f.read(rows * cols)
+            images.append(",".join([str(b) for b in binarys]))
 
-def to_csv(type_, label_path, data_path):
-    """MNIST形式からCSV出力を行います"""
-
-    # ラベルデータをCSVに出力します（1行で1枚の画像中）
-    data_f = gzip.open(label_path, "rb")
-    magic_number, img_count = struct.unpack(">II", data_f.read(8))
-    labels = []
-    for i in range(img_count):
-        label = str(struct.unpack("B", data_f.read(1))[0])
-        labels.append(label)
-    # 書き出し
-    dirname_out = "./data_" + type_
-    training_label_csv = path.join(dirname_out, "labels.csv")
-    with open(training_label_csv, "w") as f:
-        f.write("\n".join(labels))
-    
-    # トレーニングデータをCSVに出力します（1ピクセルで1データ、1行で1枚の画像）
-    data_f = gzip.open(data_path, "rb")
-    # ラベル読み込み, 画像数
-    magic_number, img_count = struct.unpack(">II", data_f.read(8))
-    # 画像1枚あたりの縦幅と横幅
-    rows, cols = struct.unpack(">II", data_f.read(8))
-    pixels = rows * cols
-    # 画像読み込み
-    images = []
-    for i in range(img_count):
-        binary = data_f.read(pixels)
-        images.append(",".join([str(b) for b in binary]))
-    # 書き出し
-    dirname_out = "./data_" + type_
-    training_data_csv = path.join(dirname_out, "images.csv")
-    with open(training_data_csv, "w") as f:
+    # CSV結果として出力します.
+    with open(os.path.join("csv", type_ + "_image.csv"), "w") as f:
         f.write("\n".join(images))
 
-    # サンプル書き出し
-    # TODO できればpng出力にしたいなー
-    if type_ == "training":
-        # 10個だけ画像として書きだし
-        for i, image in enumerate(images[:100]):
-            s = "P2 28 28 255\n"
-            s += " ".join(image.split(","))
-            p = path.join("data_image_sample", str(i) + ".pgm")
-            print(p)
-            with open(p, "w", encoding="utf-8") as f:
-                f.write(s)
 
-    # TODO 
-    # リソースのクローズ.
+def csv_label(fname, type_):
+    """
+        ラベルデータを出力します.
+        @param {String} fname - MNISTのファイル名
+        @param {String} type_ - one of { training | test }
+    """
+    print("%s processing..." % fname)
+
+    # ラベルデータをGzipファイルから読み取ります.
+    with gzip.open(os.path.join("mnist", fname), "rb") as f:
+        _, cnt = struct.unpack(">II", f.read(8))
+        labels = []
+        for i in range(cnt):
+            label = str(struct.unpack("B", f.read(1))[0])
+            labels.append(label)
+
+    # CSV結果として出力します.
+    with open(os.path.join("csv", type_ + "_label.csv"), "w") as f:
+        f.write("\n".join(labels))
 
 
 if __name__ == "__main__":
 
-    dirname = "./data_mnist"
-    training_data  = path.join(dirname, "train-images-idx3-ubyte.gz")
-    training_label = path.join(dirname, "train-labels-idx1-ubyte.gz")
-    test_data  = path.join(dirname, "t10k-images-idx3-ubyte.gz")
-    test_label = path.join(dirname, "t10k-labels-idx1-ubyte.gz")
+    if not os.path.exists("csv"):
+        os.mkdir("csv")
 
-    to_csv("training", training_label, training_data)
-    to_csv("test", test_label, test_data)
+    # トレーニングデータ.
+    csv_image("train-images-idx3-ubyte.gz", "training")
+    csv_label("train-labels-idx1-ubyte.gz", "training")
+
+    # テストデータ.
+    csv_image("t10k-images-idx3-ubyte.gz", "test")
+    csv_label("t10k-labels-idx1-ubyte.gz", "test")
