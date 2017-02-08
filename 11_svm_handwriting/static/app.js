@@ -41,7 +41,8 @@ function draw() {
         }
     }
 
-    requestAnimationFrame(draw);
+    // requestAnimationFrame(draw);
+    console.log('draw:', points.length);
 }
 
 function judge() {
@@ -72,7 +73,14 @@ function judge() {
     var pixcels = imgd.data;
     for (let i = 0; i < pixcels.length; i += 4) {
         let alpha = pixcels[i + 3];
+        console.log(pixcels[i + 0], pixcels[i + 1], pixcels[i + 2], pixcels[i + 3]);
         data.push(alpha);
+    }
+
+    let tmp = data.filter(d => d > 0);
+    if (tmp.length === 0) {
+        console.log('aaaaaaa');
+        return;
     }
 
     console.log('alpha.size=', data.length, 28*28);
@@ -112,10 +120,18 @@ function handleMouseMove(e) {
 }
 
 function handleMouseUp() {
-    console.log('upOrLeave');
+    console.log('up');
     drawing = false;
 
-    judge();
+    setTimeout(judge, 300);
+}
+
+
+function handleMouseLeave() {
+    console.log('Leave');
+    drawing = false;
+
+    setTimeout(judge, 300);
 }
 
 function handleDelButtonClick() {
@@ -138,7 +154,7 @@ function startApplication() {
     canvas.addEventListener('mousedown', handleMouseDown);
     canvas.addEventListener('mousemove', handleMouseMove);
     canvas.addEventListener('mouseup', handleMouseUp);
-    canvas.addEventListener('mouseleave', handleMouseUp);
+    canvas.addEventListener('mouseleave', handleMouseLeave);
 
     let delButton = document.getElementById('delButton');
     delButton.addEventListener('click', handleDelButtonClick);

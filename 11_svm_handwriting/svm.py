@@ -58,4 +58,4 @@ if __name__ == "__main__":
     # 結果を保存する
     if not os.path.exists("result"):
         os.mkdir("result")
-    joblib.dump(clf, os.path.join("result", "svg.pkl"))
+    joblib.dump(clf, os.path.join("result", "svm.pkl"))
