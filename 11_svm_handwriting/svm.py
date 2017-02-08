@@ -2,7 +2,7 @@
     SVMアルゴリズムで手書き文字の判定を学習し、また結果を評価します.
 """
 import os
-from sklearn import cross_validation, svm, metrics
+from sklearn import svm, metrics
 from sklearn.externals import joblib
 
 # 学習用データの数
@@ -27,8 +27,6 @@ def load_data(type_, size):
 
     images = [[int(i)/256 for i in image.split(",")] for image in images]
     labels = [int(l) for l in labels]
-
-    print(images[0])
 
     return images, labels
 
