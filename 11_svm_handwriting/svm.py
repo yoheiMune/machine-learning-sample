@@ -1,55 +1,63 @@
-from os import path
+"""
+    SVMアルゴリズムで手書き文字の判定を学習し、また結果を評価します.
+"""
+import os
 from sklearn import cross_validation, svm, metrics
 from sklearn.externals import joblib
 
-# TODO リソース閉じる
+# 学習用データの数
+SIZE_TRAINING = 500
+
+# 検証用データの数
+SIZE_TEST = 500
+
+def load_data(type_, size):
+    """
+        イメージとラベルのデータを取得して返却します.
+        またここで学習しやすいように、各数値を256で割って1以下の数値にします.
+
+        @param {String} type_ - one of { training | test }
+        @param {Int} size - 返却する要素数
+    """
+
+    with open(os.path.join("csv", "%s_image.csv" % type_)) as f:
+        images = f.read().split("\n")[:size]
+    with open(os.path.join("csv", "%s_label.csv" % type_)) as f:
+        labels = f.read().split("\n")[:size]
+
+    images = [[int(i)/256 for i in image.split(",")] for image in images]
+    labels = [int(l) for l in labels]
+
+    print(images[0])
+
+    return images, labels
+
 
 if __name__ == "__main__":
 
-    print("#### データ読み込み開始")
-    
-    traing_data  = path.join("./data_training", "images.csv")
-    traing_label = path.join("./data_training", "labels.csv")
-    test_data  = path.join("./data_test", "images.csv")
-    test_label = path.join("./data_test", "labels.csv")
-
-    # トレーニング用のデータ（5,000件に絞る）
-    training_size = 20000
-    training = { "labels": [], "images": [] }
-    images = open(traing_data, "r").read().split("\n")[:training_size]
-    labels = open(traing_label, "r").read().split("\n")[:training_size]
-    for label, image in zip(labels, images):
-        image = [int(i)/256 for i in image.split(",")]
-        training["labels"].append(int(label))
-        training["images"].append(image)
-    print("\ttraining: %d, %d" % (len(training["labels"]), len(training["images"])))
-
-    # テスト用のデータ（5,000件に絞る）
-    test_size = 1000
-    test = { "labels": [], "images": [] }
-    images = open(traing_data, "r").read().split("\n")[:test_size]
-    labels = open(traing_label, "r").read().split("\n")[:test_size]
-    for label, image in zip(labels, images):
-        image = [int(i)/256 for i in image.split(",")]
-        test["labels"].append(int(label))
-        test["images"].append(image)
-    print("\ttest: %d, %d" % (len(test["labels"]), len(test["images"])))
+    # トレーニングデータを取得します.
+    images, labels = load_data("training", SIZE_TRAINING)
 
     # 学習
-    print("#### 学習開始")
+    print("学習開始")
     clf = svm.SVC()
-    clf.fit(training["images"], training["labels"])
+    clf.fit(images, labels)
+
+    # テストデータを取得します.
+    images, labels = load_data("test", SIZE_TEST)
 
     # 予測
-    print("#### 予測開始")
-    predict = clf.predict(test["images"])
+    print("予測開始")
+    predict = clf.predict(images)
 
     # 結果表示
-    print("#### 結果だよー")
-    ac_score = metrics.accuracy_score(test["labels"], predict)
-    cl_report = metrics.classification_report(test["labels"], predict)
+    print("結果だよー")
+    ac_score = metrics.accuracy_score(labels, predict)
+    cl_report = metrics.classification_report(labels, predict)
     print("正解率 = ", ac_score)
     print(cl_report)
 
     # 結果を保存する
-    joblib.dump(clf, path.join("data-clf", "freq.pkl"))
+    if not os.path.exists("result"):
+        os.mkdir("result")
+    joblib.dump(clf, os.path.join("result", "svg.pkl"))
