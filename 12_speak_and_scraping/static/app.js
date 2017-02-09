@@ -1,39 +1,45 @@
 
-
 let recognition;
+
+
+/**
+ * サーバー通信を行う.
+ */
+function api(url) {
+    return new Promise((resolve, reject) => {
+        var xhr = new XMLHttpRequest();
+        xhr.open('GET', url, true);
+        xhr.onreadystatechange = function (e) {
+            if (this.readyState === 4 && this.status === 200) {
+                resolve(this.responseText);
+            }
+        }
+        xhr.send();
+    });
+}
+
 
 function handleStartButtonClick() {
     console.log('handleStartButtonClick');
 
     recognition = new webkitSpeechRecognition();
     recognition.lang = 'ja';
-    // recognition.lang = 'ja-JP';
-    // recognition.onresult = function(e) {
-    //     alert('aaaaaa');
-    //     console.log(e);
-    //     if (e.results.length > 0) {
-    //         console.log(e.results);
-    //         let value = e.results[0][0].transcript;
-    //         console.log(value);
-    //     }
-    // };
 
     recognition.onstart = function() {
         console.log('onstart');
+        document.querySelector('.js-btn-group').classList.add('--recording');
     };
 
     recognition.onerror = function(event) {
         console.log('onerror:', event.error);
+        document.querySelector('.js-btn-group').classList.remove('--recording');
     };
 
     recognition.onend = function() {
         console.log('onend');
+        document.querySelector('.js-btn-group').classList.remove('--recording');
     };
 
-    // recognition.addEventListener('result', event => {
-    //   console.log('onresult2');
-    //   alert(event.results.item(0).item(0).transcript);
-    // }, false);
 
     recognition.onresult = event => {
       console.log('onresult2');
@@ -44,30 +50,6 @@ function handleStartButtonClick() {
         showRecommendArticle();
       }
     };
-
-    // recognition.onresult = function(event) {
-    //     console.log('onresult');
-    //   var interim_transcript = '';
-    //   // if (typeof(event.results) == 'undefined') {
-    //   //   recognition.onend = null;
-    //   //   recognition.stop();
-    //   //   upgrade();
-    //   //   return;
-    //   // }
-    //   for (var i = event.resultIndex; i < event.results.length; ++i) {
-    //     if (event.results[i].isFinal) {
-    //       final_transcript += event.results[i][0].transcript;
-    //     } else {
-    //       interim_transcript += event.results[i][0].transcript;
-    //     }
-    //   }
-    //   final_transcript = capitalize(final_transcript);
-    //   final_span.innerHTML = linebreak(final_transcript);
-    //   interim_span.innerHTML = linebreak(interim_transcript);
-    //   if (final_transcript || interim_transcript) {
-    //     showButtons('inline-block');
-    //   }
-    // };
 
     recognition.start();
 }
@@ -83,32 +65,66 @@ function handleStopButtonClick() {
 
 function showRecommendArticle() {
 
-  $.getJSON('/api/recommend_article').then(({ content, link }) => {
-    console.log(content);
+    api('/api/recommend_article').then(response => {
+        let { content, link } = JSON.parse(response);
+        console.log(content);
 
-    let synthes = new SpeechSynthesisUtterance(content);
-    synthes.lang = "ja-JP";
-    speechSynthesis.speak(synthes);
+        content = content.split("-")[0];
 
-    document.getElementById('result').innerHTML = `
-        <a href="${link}">${content}</a><br>
-    `;
+        let synthes = new SpeechSynthesisUtterance(content);
+        synthes.lang = "ja-JP";
+        speechSynthesis.speak(synthes);
 
-  });
+        document.getElementById('text').innerHTML = `
+            <a href="${link}">${content}</a><br>
+        `;
+    });
 
 }
 
 // test.
-showRecommendArticle();
+// showRecommendArticle();
+
+function startIntro() {
+
+    let elm = document.getElementById('text');
+
+    return new Promise((resolve, reject) => {
+
+        let texts = "「おすすめニュースを教えて」と聞いてみてください。".split('');
+
+        function showMessage(texts, cb) {
+            if (texts.length === 0) {
+                return cb();
+            }
+            let ch = texts.shift();
+            elm.innerHTML += ch;
+            setTimeout(() => {
+                showMessage(texts, cb);
+            }, 120);
+        }
+
+        elm.innerHTML = '';
+        showMessage(texts, resolve);
+    });
+
+}
 
 
 function startApplication() {
 
-    let startButton = document.getElementById('startButton');
-    startButton.addEventListener('click', handleStartButtonClick);
+    startIntro().then(() => {
 
-    let stopButton = document.getElementById('stopButton');
-    stopButton.addEventListener('click', handleStopButtonClick);
+        // TODO ボタン表示など.
+        document.querySelector('.js-btn-group').classList.add('--visible');
+
+        let startButton = document.getElementById('startButton');
+        startButton.addEventListener('click', handleStartButtonClick);
+
+        let stopButton = document.getElementById('stopButton');
+        stopButton.addEventListener('click', handleStopButtonClick);
+    });
+
 }
 
 window.addEventListener('DOMContentLoaded', startApplication);
