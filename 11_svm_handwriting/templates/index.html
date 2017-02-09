@@ -2,16 +2,21 @@
 <html lang="en">
 <head>
     <meta charset="UTF-8">
-    <title></title>
+    <title>手書き文字を判定するアプリ</title>
+    <link rel="stylesheet" href="https://fonts.googleapis.com/icon?family=Material+Icons">
+    <link rel="stylesheet" href="https://code.getmdl.io/1.3.0/material.indigo-pink.min.css">
+    <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/font-awesome/4.7.0/css/font-awesome.min.css">
+    <script defer src="https://code.getmdl.io/1.3.0/material.min.js"></script>
     <style>
         #canvas {
             display: block;
-/*            width: 300px;
+            width: 300px;
             height: 300px;
-*/            border: 1px solid #ccc;
+            border: 1px solid #ccc;
         }
         .flex-box {
             display: flex;
+            justify-content: center;
         }
         #judgeButton {
             margin: 10px;
@@ -24,26 +29,27 @@
             text-align: center;
             line-height: 300px;
         }
+        .arrow {
+            line-height: 300px;
+            margin: 0 20px;
+            font-size: 20px;
+        }
     </style>
-    <script type="text/javascript" src="/static/app.js"></script>
 </head>
 <body>
-    
-    <h1>手書き文字を判定するアプリ</h1>
-
+    <h1 style="text-align: center;">手書き文字を判定するアプリ</h1>
     <div class="flex-box">
         <div>
-            <p style="text-align:center;margin:0;">▼フリーハンドで書いてみる▼</p>
-            <canvas id="canvas" width="300" height="300"></canvas>
-            <button id="delButton">消す</button>
+            <p style="text-align:center;margin:0;">▼フリーハンドで書いてみる(一筆書き)▼</p>
+            <canvas id="canvas" width="300" height="300" class="mdl-card mdl-shadow--2dp"></canvas>
+            <button id="delButton" class="mdl-button mdl-js-button mdl-button--primary mdl-js-ripple-effect" style="margin-top:10px;">消す</button>
         </div>
-        <div style="line-height:300px;margin:0 10px;">判定&nbsp;=&gt;</div>
+        <div class="arrow"><i class="fa fa-arrow-right" aria-hidden="true"></i></div>
         <div>
             <p style="text-align:center;margin:0;">▼判定結果だよー▼</p>
-            <div id="result"></div>
+            <div id="result" class="mdl-card mdl-shadow--2dp"></div>
         </div>
     </div>
-    <br>
-    <p>※ フリーハンドは一筆書きでお願いします（4とか5とか）。</p>
+    <script type="text/javascript" src="/static/app.js"></script>
 </body>
 </html>

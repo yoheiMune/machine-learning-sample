@@ -4,11 +4,25 @@
  * 描画中か否かを判定するフラグ.
  */
 let drawing = false;
+
+/**
+ * 描画するマウスの軌跡を保持する変数.
+ */
 let points = [];
 
+/**
+ * Canvas要素.
+ */
 let canvas;
+
+/**
+ * Canvasのコンテキスト要素.
+ */
 let context;
 
+/**
+ * サーバー通信を行う.
+ */
 function api(url) {
     return new Promise((resolve, reject) => {
         var xhr = new XMLHttpRequest();
@@ -18,12 +32,13 @@ function api(url) {
                 resolve(this.responseText);
             }
         }
-        // let formData = new FormData();
-        // formData.append('data', data);
         xhr.send();
     });
 }
 
+/**
+ * Canvasに手書き文字を描画します.
+ */
 function draw() {
 
     context.clearRect(0, 0, canvas.width, canvas.height);
@@ -40,128 +55,109 @@ function draw() {
             context.stroke();
         }
     }
-
-    // requestAnimationFrame(draw);
-    console.log('draw:', points.length);
 }
 
+/**
+ * 手書き文字の判定を行います.
+ */
 function judge() {
 
     // 28 x 28 に圧縮する.
     let img = new Image();
     img.src = canvas.toDataURL();
+    img.onload = () => { 
 
-    // tmp.
-    let resultPanel = document.getElementById('result');
-    // resultPanel.innerHTML = '';
-    // resultPanel.appendChild(img);
+        let tmpCanvas = document.createElement('canvas');
+        tmpCanvas.width = 28;
+        tmpCanvas.height = 28;
+        tmpCanvas.getContext('2d').drawImage(img, 0, 0, 28, 28);
 
-    let tmpCanvas = document.createElement('canvas');
-    tmpCanvas.width = 28;
-    tmpCanvas.height = 28;
-    tmpCanvas.getContext('2d').drawImage(img, 0, 0, 28, 28);
+        let imgResize = new Image();
+        imgResize.src = tmpCanvas.toDataURL();
+        imgResize.onload = () => {
 
-    let imgResize = new Image();
-    imgResize.src = tmpCanvas.toDataURL();
 
-    // resultPanel.innerHTML = '';
-    // resultPanel.appendChild(imgResize);
+            // 28 x 28 からピクセル要素を抜き出します.
+            let data = [];
+            var imgd = tmpCanvas.getContext('2d').getImageData(0, 0, 28, 28);
+            var pixcels = imgd.data;
+            for (let i = 0; i < pixcels.length; i += 4) {
+                let alpha = pixcels[i + 3];
+                console.log(pixcels[i + 0], pixcels[i + 1], pixcels[i + 2], pixcels[i + 3]);
+                data.push(alpha);
+            }
 
-    // 28x28
-    let data = [];
-    var imgd = tmpCanvas.getContext('2d').getImageData(0, 0, 28, 28);
-    var pixcels = imgd.data;
-    for (let i = 0; i < pixcels.length; i += 4) {
-        let alpha = pixcels[i + 3];
-        console.log(pixcels[i + 0], pixcels[i + 1], pixcels[i + 2], pixcels[i + 3]);
-        data.push(alpha);
+            // 何も描画されていなかったら、判定しない.
+            let tmp = data.filter(d => d > 0);
+            if (tmp.length === 0) {
+                return;
+            }
+
+            // サーバーで判定を行い、結果を表示する.
+            let url = '/api/judge?data=' + data.join(',');
+            api(url).then(result => {
+                document.getElementById('result').innerHTML = result;
+            });
+        }
     }
-
-    let tmp = data.filter(d => d > 0);
-    if (tmp.length === 0) {
-        console.log('aaaaaaa');
-        return;
-    }
-
-    console.log('alpha.size=', data.length, 28*28);
-
-    let url = '/api/judge?data=' + data.join(',');
-
-    api(url).then(result => {
-        resultPanel.innerHTML = result;
-    });
-
 }
 
-
-
-
-
-
-
-
-
+/**
+ * マウスダウンのイベントを扱います.
+ */
 function handleMouseDown(e) {
-    console.log('down');
     drawing = true;
     points = [];
 }
 
+/**
+ * マウス移動のイベントを扱います.
+ */
 function handleMouseMove(e) {
 
-    let rect = canvas.getBoundingClientRect();
-    let x = Math.max(0, e.clientX - rect.left);
-    let y = Math.max(0, e.clientY - rect.top);
-    
     if (drawing) {
+        let rect = canvas.getBoundingClientRect();
+        let x = Math.max(0, e.clientX - rect.left);
+        let y = Math.max(0, e.clientY - rect.top);
         points.push({x, y});
         draw();
     }
 }
 
+/**
+ * マウスアップのイベントを扱います.
+ */
 function handleMouseUp() {
-    console.log('up');
+    draw();
     drawing = false;
-
-    setTimeout(judge, 300);
+    judge();
 }
 
-
+/**
+ * マウスリーヴのイベントを扱います.
+ */
 function handleMouseLeave() {
-    console.log('Leave');
     drawing = false;
-
-    setTimeout(judge, 300);
 }
 
+/**
+ * 削除ボタンへのクリックを扱います.
+ */
 function handleDelButtonClick() {
-    console.log('handleDelButtonClick');
     points = [];
+    draw();
 }
 
-// function handleJudgeButtonClick() {
-//     console.log('handleJudgeButtonClick');
-//     judge();
-// }
-
-function startApplication() {
+// アプリケーションを開始します.
+window.addEventListener('DOMContentLoaded', () => {
 
     canvas = document.getElementById('canvas');
     context = canvas.getContext('2d');
 
-    console.log(canvas.width, canvas.height);
+    canvas.onmousedown = handleMouseDown;
+    canvas.onmousemove = handleMouseMove;
+    canvas.onmouseup = handleMouseUp;
+    canvas.onmouseleave = handleMouseLeave;
 
-    canvas.addEventListener('mousedown', handleMouseDown);
-    canvas.addEventListener('mousemove', handleMouseMove);
-    canvas.addEventListener('mouseup', handleMouseUp);
-    canvas.addEventListener('mouseleave', handleMouseLeave);
-
-    let delButton = document.getElementById('delButton');
-    delButton.addEventListener('click', handleDelButtonClick);
-
-    // let judgeButton = document.getElementById('judgeButton');
-    // judgeButton.addEventListener('click', handleJudgeButtonClick);
-
-}
-
-window.addEventListener('DOMContentLoaded', startApplication);
+    document.getElementById('delButton').onclick = handleDelButtonClick;
+});
