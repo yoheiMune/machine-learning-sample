@@ -1,4 +1,7 @@
 
+/**
+ * 音声認識のインスタンス.
+ */
 let recognition;
 
 
@@ -18,51 +21,68 @@ function api(url) {
     });
 }
 
-
+/**
+ * 開始ボタンを押した時のイベント.
+ */
 function handleStartButtonClick() {
-    console.log('handleStartButtonClick');
 
+    // 音声認識のインスタンスを生成します.
     recognition = new webkitSpeechRecognition();
+
+    // 言語は日本語にします.
     recognition.lang = 'ja';
 
+    // 音声認識開始時のイベント.
     recognition.onstart = function() {
         console.log('onstart');
         document.querySelector('.js-btn-group').classList.add('--recording');
     };
 
+    // 音声認識エラー発生時のイベント.
     recognition.onerror = function(event) {
         console.log('onerror:', event.error);
         document.querySelector('.js-btn-group').classList.remove('--recording');
     };
 
+    // 音声認識終了時のイベント.
     recognition.onend = function() {
         console.log('onend');
         document.querySelector('.js-btn-group').classList.remove('--recording');
     };
 
-
+    // 音声認識の結果を取得した時のイベント.
     recognition.onresult = event => {
-      console.log('onresult2');
+      console.log('onresult');
       let text = event.results.item(0).item(0).transcript;
-      alert(text);
 
       if (text.indexOf('ニュース') !== -1) {
+        // ニュースだったら、API経由でおすすめ記事を取得する.
         showRecommendArticle();
+      
+      } else {
+        // ニュース以外はわからないよ〜.
+        let synthes = new SpeechSynthesisUtterance('ごめんなさい、ニュース以外はわかりません');
+        synthes.lang = "ja-JP";
+        speechSynthesis.speak(synthes);        
       }
     };
 
+    // 音声認識を開始します.
     recognition.start();
 }
 
+/**
+ * 停止ボタンを押した時のイベント.
+ */
 function handleStopButtonClick() {
-    console.log('handleStopButtonClick');
-
     if (recognition) {
-        console.log('aaaaaaaaa');
         recognition.stop();
     }
 }
 
+/**
+ * API経由でおすすめニュースを取得して、音声で発します.
+ */
 function showRecommendArticle() {
 
     api('/api/recommend_article').then(response => {
@@ -75,16 +95,13 @@ function showRecommendArticle() {
         synthes.lang = "ja-JP";
         speechSynthesis.speak(synthes);
 
-        document.getElementById('text').innerHTML = `
-            <a href="${link}">${content}</a><br>
-        `;
+        document.getElementById('text').innerHTML = `<a href="${link}">${content}</a>`;
     });
-
 }
 
-// test.
-// showRecommendArticle();
-
+/**
+ * アプリ起動時に、説明を表示します.
+ */
 function startIntro() {
 
     let elm = document.getElementById('text');
@@ -107,24 +124,19 @@ function startIntro() {
         elm.innerHTML = '';
         showMessage(texts, resolve);
     });
-
 }
 
+/**
+ * アプリを起動します.
+ */
+window.addEventListener('DOMContentLoaded', () => {
 
-function startApplication() {
-
+    // アプリの説明を行います.
     startIntro().then(() => {
 
-        // TODO ボタン表示など.
+        // ボタンの表示と挙動
         document.querySelector('.js-btn-group').classList.add('--visible');
-
-        let startButton = document.getElementById('startButton');
-        startButton.addEventListener('click', handleStartButtonClick);
-
-        let stopButton = document.getElementById('stopButton');
-        stopButton.addEventListener('click', handleStopButtonClick);
+        document.getElementById('startButton').onclick = handleStartButtonClick;
+        document.getElementById('stopButton').onclick = handleStopButtonClick;
     });
-
-}
-
-window.addEventListener('DOMContentLoaded', startApplication);
+});
